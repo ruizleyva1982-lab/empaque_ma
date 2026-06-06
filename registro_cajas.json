@@ -1,0 +1,48 @@
+[
+  {
+    "fecha": "2026-06-05",
+    "codigo": "M6020026",
+    "descripcion": "GALLETA CRANBERRY",
+    "factor": 72.0,
+    "cajas": 12.0,
+    "total_unidades": 864.0,
+    "turno": "Turno Tarde",
+    "operario": "Janeth Sanchez"
+  },
+  {
+    "fecha": "2026-06-05",
+    "codigo": "M6020036",
+    "descripcion": "TAPAS ALFAJOR - AGENDA",
+    "presentacion": "Jaba",
+    "factor_ref": 24.0,
+    "factor": 48.0,
+    "cajas": 5.0,
+    "total_unidades": 240.0,
+    "turno": "Turno Mañana",
+    "operario": "Janeth Sanchez"
+  },
+  {
+    "fecha": "2026-06-05",
+    "codigo": "M6020044",
+    "descripcion": "BASE DE TARTALETA CIRCULAR",
+    "presentacion": "Caja",
+    "factor_ref": 12.0,
+    "factor": 12.0,
+    "cajas": 10.0,
+    "total_unidades": 120.0,
+    "turno": "Turno Mañana",
+    "operario": "Janeth Sanchez"
+  },
+  {
+    "fecha": "2026-06-05",
+    "codigo": "M6020044",
+    "descripcion": "BASE DE TARTALETA CIRCULAR",
+    "presentacion": "Jaba",
+    "factor_ref": 12.0,
+    "factor": 24.0,
+    "cajas": 5.0,
+    "total_unidades": 120.0,
+    "turno": "Turno Mañana",
+    "operario": "Janeth Sanchez"
+  }
+]
