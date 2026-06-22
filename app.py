@@ -491,7 +491,10 @@ if st.session_state.registro:
         # ── Selector de fila ──────────────────────────────────
         opciones_filas = {
             f"#{i+1} — {row['Descripción']} | {row['Presentación']} | {row['Cantidad']:,.0f} uds | {row['Turno']}": idx_global
-            for i, (row, idx_global) in enumerate(zip(tabla_show.itertuples(index=False), indices_globales))
+            for i, (row, idx_global) in enumerate(zip(
+                [tabla_show.iloc[j] for j in range(len(tabla_show))],
+                indices_globales
+            ))
         }
         fila_sel_label = st.selectbox(
             "✏️ Selecciona una línea para editar o eliminar:",
