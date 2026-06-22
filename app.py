@@ -488,39 +488,56 @@ if st.session_state.registro:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # ── Selector de fila ──────────────────────────────────
-        opciones_filas = {
-            f"#{i+1} — {row['Descripción']} | {row['Presentación']} | {row['Cantidad']:,.0f} uds | {row['Turno']}": idx_global
-            for i, (row, idx_global) in enumerate(zip(
-                [tabla_show.iloc[j] for j in range(len(tabla_show))],
-                indices_globales
-            ))
-        }
-        fila_sel_label = st.selectbox(
-            "✏️ Selecciona una línea para editar o eliminar:",
-            options=["— Seleccionar línea —"] + list(opciones_filas.keys()),
-            key="sel_fila_accion",
+        # ── Tabla con checkbox de selección ──────────────────
+        tabla_editor = tabla_show.copy()
+        tabla_editor.insert(0, "✔", False)  # columna checkbox al inicio
+
+        edited = st.data_editor(
+            tabla_editor,
+            column_config={
+                "✔": st.column_config.CheckboxColumn("✔", width="small", default=False),
+                "Cantidad":       st.column_config.NumberColumn(format="%.2f"),
+                "Factor Ref.":    st.column_config.NumberColumn(format="%.2f"),
+                "Factor Real":    st.column_config.NumberColumn(format="%.2f"),
+                "Total Unidades": st.column_config.NumberColumn(format="%.2f"),
+            },
+            disabled=["Fecha","Código","Descripción","Presentación","Cantidad",
+                      "Factor Ref.","Factor Real","Total Unidades","Turno","Operario"],
+            use_container_width=True,
+            height=min(40 * len(tabla_editor) + 80, 600),
+            hide_index=True,
+            key="tabla_editor",
         )
+
+        # Filas marcadas
+        filas_marcadas = edited[edited["✔"] == True].index.tolist()
+        idx_global_marcados = [indices_globales[i] for i in filas_marcadas]
 
         col_acc1, col_acc2, _ = st.columns([1, 1, 2])
         with col_acc1:
-            btn_editar  = st.button("✏️ Editar línea",    type="primary",    use_container_width=True)
+            btn_editar  = st.button("✏️ Editar",    type="primary",   use_container_width=True,
+                                    disabled=len(filas_marcadas) != 1)
         with col_acc2:
-            btn_eliminar = st.button("🗑️ Eliminar línea", type="secondary",  use_container_width=True)
+            btn_eliminar = st.button("🗑️ Eliminar", type="secondary", use_container_width=True,
+                                    disabled=len(filas_marcadas) == 0)
 
-        if fila_sel_label != "— Seleccionar línea —":
-            idx_global_sel = opciones_filas[fila_sel_label]
+        if len(filas_marcadas) == 0:
+            st.caption("☝️ Marca una casilla para habilitar Editar o Eliminar.")
+        elif len(filas_marcadas) > 1 and btn_editar:
+            st.warning("Solo puedes editar una línea a la vez.")
 
-            if btn_eliminar:
-                with st.spinner("Eliminando en Google Sheets..."):
-                    eliminar_fila_por_indice(idx_global_sel)
-                st.session_state.registro.pop(idx_global_sel)
-                st.session_state.editando_idx = None
-                st.success("✅ Línea eliminada.")
-                st.rerun()
+        if btn_eliminar and idx_global_marcados:
+            # Eliminar de mayor a menor para no desplazar índices
+            for idx_g in sorted(idx_global_marcados, reverse=True):
+                with st.spinner("Eliminando..."):
+                    eliminar_fila_por_indice(idx_g)
+                st.session_state.registro.pop(idx_g)
+            st.session_state.editando_idx = None
+            st.success(f"✅ {len(idx_global_marcados)} línea(s) eliminada(s).")
+            st.rerun()
 
-            if btn_editar:
-                st.session_state.editando_idx = idx_global_sel
+        if btn_editar and len(filas_marcadas) == 1:
+            st.session_state.editando_idx = idx_global_marcados[0]
 
         # ── Formulario de edición ─────────────────────────────
         if st.session_state.editando_idx is not None:
@@ -600,19 +617,6 @@ if st.session_state.registro:
                         if st.button("❌ Cancelar", use_container_width=True, key="btn_cancelar_edit"):
                             st.session_state.editando_idx = None
                             st.rerun()
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # ── Tabla visual ─────────────────────────────────────
-        st.dataframe(
-            tabla_show.style
-                .format({"Cantidad":"{:,.2f}","Factor Ref.":"{:,.2f}","Factor Real":"{:,.2f}","Total Unidades":"{:,.2f}"})
-                .background_gradient(subset=["Total Unidades"], cmap="Blues")
-                .set_properties(**{"font-size":"13px"}),
-            use_container_width=True,
-            height=min(40 * len(tabla_show) + 80, 600),
-            hide_index=True,
-        )
 
 else:
     st.info("📭 No hay registros todavía.")
