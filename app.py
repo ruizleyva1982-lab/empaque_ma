@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import date
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 import json
 import gspread
@@ -251,7 +251,7 @@ st.markdown("""
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## 📅 Fecha de Registro")
-    fecha_sel = st.date_input("Selecciona la fecha", value=date.today(ZoneInfo("America/Lima")), format="DD/MM/YYYY")
+    fecha_sel = st.date_input("Selecciona la fecha", value=datetime.now(ZoneInfo("America/Lima")).date(), format="DD/MM/YYYY")
 
     st.markdown("---")
     st.markdown("## 🔍 Buscar Producto")
