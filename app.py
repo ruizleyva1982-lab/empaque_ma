@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import date
+from zoneinfo import ZoneInfo
 import json
 import gspread
 from google.oauth2.service_account import Credentials
@@ -113,14 +114,16 @@ COLS_REGISTRO = ["fecha", "codigo", "descripcion", "presentacion",
 def cargar_registro():
     try:
         ws = get_ws("registro")
-        data = ws.get_all_records()
+        # Usar expected_headers para evitar error por celdas vacías en encabezado
+        data = ws.get_all_records(expected_headers=COLS_REGISTRO)
         if not data:
             return []
         df = pd.DataFrame(data)
-        # Asegurar columnas
         for c in COLS_REGISTRO:
             if c not in df.columns:
                 df[c] = ""
+        # Filtrar filas completamente vacías
+        df = df[df["fecha"].astype(str).str.strip() != ""]
         return df[COLS_REGISTRO].to_dict("records")
     except Exception as e:
         st.error(f"Error cargando registro: {e}")
@@ -170,7 +173,7 @@ def limpiar_registro_completo():
     try:
         ws = get_ws("registro")
         ws.clear()
-        ws.append_row(COLS_REGISTRO)
+        ws.append_row(COLS_REGISTRO, value_input_option="RAW")
     except Exception as e:
         st.error(f"Error limpiando registro: {e}")
 
@@ -248,7 +251,7 @@ st.markdown("""
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## 📅 Fecha de Registro")
-    fecha_sel = st.date_input("Selecciona la fecha", value=date.today(), format="DD/MM/YYYY")
+    fecha_sel = st.date_input("Selecciona la fecha", value=date.today(ZoneInfo("America/Lima")), format="DD/MM/YYYY")
 
     st.markdown("---")
     st.markdown("## 🔍 Buscar Producto")
