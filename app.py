@@ -392,10 +392,17 @@ with col_der:
         with col_op:
             lista_ops = st.session_state.operarios
             if lista_ops:
-                operario = st.selectbox("👷 Operario", options=["— Seleccionar —"] + lista_ops, index=0)
-                operario = "" if operario == "— Seleccionar —" else operario
+                operarios_sel = st.multiselect(
+                    "👷 Operario(s)",
+                    options=lista_ops,
+                    placeholder="Selecciona 1 o más...",
+                    max_selections=3,
+                )
+                operario = " / ".join(operarios_sel) if operarios_sel else ""
+                if operarios_sel:
+                    st.caption(f"✅ {len(operarios_sel)} operario(s) seleccionado(s)")
             else:
-                st.selectbox("👷 Operario", options=["Sin operarios registrados"], disabled=True)
+                st.multiselect("👷 Operario(s)", options=[], disabled=True, placeholder="Sin operarios registrados")
                 operario = ""
                 st.caption("⚠️ Registra operarios en la sección de abajo.")
 
@@ -579,11 +586,17 @@ if st.session_state.registro:
                             key="e_turno")
 
                     lista_ops = st.session_state.operarios
-                    op_actual = r.get("operario","")
-                    op_opts = ["— Seleccionar —"] + lista_ops
-                    op_idx = op_opts.index(op_actual) if op_actual in op_opts else 0
-                    e_operario = st.selectbox("👷 Operario", options=op_opts, index=op_idx, key="e_operario")
-                    e_operario = "" if e_operario == "— Seleccionar —" else e_operario
+                    op_actual = r.get("operario", "")
+                    # Reconstruir lista preseleccionada (estaban guardados como "A / B / C")
+                    op_presel = [o.strip() for o in op_actual.split("/") if o.strip() in lista_ops]
+                    e_ops_sel = st.multiselect(
+                        "👷 Operario(s)",
+                        options=lista_ops,
+                        default=op_presel,
+                        max_selections=3,
+                        key="e_operario",
+                    )
+                    e_operario = " / ".join(e_ops_sel) if e_ops_sel else ""
 
                     e_total = e_cajas * e_factor
                     st.markdown(f"""
